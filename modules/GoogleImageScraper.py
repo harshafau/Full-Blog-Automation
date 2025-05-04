@@ -22,33 +22,48 @@ import requests
 import io
 from PIL import Image
 import re
+import logging
 
 #custom patch libraries
 from . import patch
 
 class GoogleImageScraper():
     def __init__(self, webdriver_path, image_path, search_key="cat", number_of_images=1, headless=True, min_resolution=(0, 0), max_resolution=(1920, 1080), max_missed=10):
+        self.logger = logging.getLogger(__name__)
+        
         #check parameter types
         image_path = os.path.join(image_path, search_key)
         if (type(number_of_images)!=int):
-            print("[Error] Number of images must be integer value.")
+            self.logger.error("Number of images must be integer value.")
             return
         if not os.path.exists(image_path):
-            print("[INFO] Image path not found. Creating a new folder.")
+            self.logger.info("Image path not found. Creating a new folder.")
             os.makedirs(image_path)
             
-        #check if chromedriver is installed
-        if (not os.path.isfile(webdriver_path)):
+        #check if chromedriver is installed and executable
+        if not os.path.exists(webdriver_path):
+            self.logger.error(f"ChromeDriver not found at: {webdriver_path}")
             is_patched = patch.download_lastest_chromedriver()
-            if (not is_patched):
-                exit("[ERR] Please update the chromedriver.exe in the webdriver folder according to your chrome version:https://chromedriver.chromium.org/downloads")
+            if not is_patched:
+                self.logger.error("Failed to download ChromeDriver")
+                raise Exception("ChromeDriver not found and download failed")
+        else:
+            try:
+                # Make sure ChromeDriver is executable
+                os.chmod(webdriver_path, 0o755)
+                self.logger.info(f"ChromeDriver found and made executable at: {webdriver_path}")
+            except Exception as e:
+                self.logger.error(f"Failed to make ChromeDriver executable: {str(e)}")
+                raise
 
-        for i in range(1):
+        for i in range(3):  # Try up to 3 times
             try:
                 #try going to www.google.com
                 options = Options()
                 if(headless):
                     options.add_argument('--headless')
+                options.add_argument('--no-sandbox')
+                options.add_argument('--disable-dev-shm-usage')
                 service = Service(webdriver_path)
                 driver = webdriver.Chrome(service=service, options=options)
                 driver.set_window_size(1400,1050)
@@ -56,19 +71,14 @@ class GoogleImageScraper():
                 try:
                     WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.ID, "W0wltc"))).click()
                 except Exception as e:
+                    self.logger.warning(f"Failed to click accept button: {str(e)}")
                     continue
+                break
             except Exception as e:
-                #update chromedriver
-                pattern = r'(\d+\.\d+\.\d+\.\d+)'
-                try:
-                    version = list(set(re.findall(pattern, str(e))))[0]
-                    is_patched = patch.download_lastest_chromedriver(version)
-                    if (not is_patched):
-                        exit("[ERR] Please update the chromedriver.exe in the webdriver folder according to your chrome version:https://chromedriver.chromium.org/downloads")
-                except:
-                    print("[WARN] Unable to extract version number from error message")
-                    print(f"Error message: {str(e)}")
-                    continue
+                self.logger.error(f"Failed to initialize ChromeDriver (attempt {i+1}/3): {str(e)}")
+                if i == 2:  # Last attempt
+                    raise
+                time.sleep(2)  # Wait before retrying
 
         self.driver = driver
         self.search_key = search_key

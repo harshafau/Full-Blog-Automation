@@ -21,13 +21,28 @@ class ImageHandler:
         os.makedirs(temp_dir, exist_ok=True)
         os.makedirs(DEFAULT_IMAGE_PATH, exist_ok=True)
         
-        # Initialize Google Image Scraper
-        self.webdriver_path = os.path.join(os.path.dirname(__file__), 'webdriver', 'chromedriver')
+        # Initialize Google Image Scraper with absolute path
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        self.webdriver_path = os.path.join(current_dir, 'webdriver', 'chromedriver')
         
-        # Check if ChromeDriver exists
+        # Check if ChromeDriver exists and is executable
         if not os.path.exists(self.webdriver_path):
             self.logger.error("ChromeDriver not found at: %s", self.webdriver_path)
-            self.webdriver_path = None
+            # Try to download ChromeDriver
+            from .patch import download_lastest_chromedriver
+            if download_lastest_chromedriver():
+                self.logger.info("Successfully downloaded ChromeDriver")
+            else:
+                self.logger.error("Failed to download ChromeDriver")
+                self.webdriver_path = None
+        else:
+            # Make sure ChromeDriver is executable
+            try:
+                os.chmod(self.webdriver_path, 0o755)
+                self.logger.info("ChromeDriver found and made executable at: %s", self.webdriver_path)
+            except Exception as e:
+                self.logger.error("Failed to make ChromeDriver executable: %s", str(e))
+                self.webdriver_path = None
 
     def search_google_images(self, search_query, num_images=5):
         """Search images using Google Image Scraper"""
