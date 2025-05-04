@@ -28,17 +28,17 @@ os.makedirs(webdriver_dir, exist_ok=True)
 
 # Download ChromeDriver
 if download_lastest_chromedriver():
-    echo "ChromeDriver installed successfully"
+    print('ChromeDriver installed successfully')
 else:
-    echo "Failed to install ChromeDriver"
-    exit 1
+    print('Failed to install ChromeDriver')
+    sys.exit(1)
 
 # Install SSL certificates
 if install_ssl_certificates():
-    echo "SSL certificates installed successfully"
+    print('SSL certificates installed successfully')
 else:
-    echo "Failed to install SSL certificates"
-    exit 1
+    print('Failed to install SSL certificates')
+    sys.exit(1)
 "
 
 # Run setup.py
