@@ -49,8 +49,12 @@ def get_chrome_version():
             
             for path in chrome_paths:
                 if os.path.exists(path):
-                    version = subprocess.check_output([path, "--version"]).decode('utf-8')
-                    return version.split()[2]  # Returns version number
+                    try:
+                        version = subprocess.check_output([path, "--version"]).decode('utf-8')
+                        return version.split()[2]  # Returns version number
+                    except subprocess.CalledProcessError as e:
+                        logger.error(f"Error getting Chrome version from {path}: {str(e)}")
+                        continue
                     
             logger.error("Chrome not found in standard locations")
             return None
@@ -92,28 +96,40 @@ def download_lastest_chromedriver():
         ssl_context = ssl.create_default_context(cafile=certifi.where())
         http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
         
-        response = http.request('GET', version_url)
-        if response.status != 200:
-            logger.error(f"Failed to download ChromeDriver. Status code: {response.status}")
+        try:
+            response = http.request('GET', version_url)
+            if response.status != 200:
+                logger.error(f"Failed to download ChromeDriver. Status code: {response.status}")
+                return False
+        except Exception as e:
+            logger.error(f"Error downloading ChromeDriver: {str(e)}")
             return False
             
         # Extract the zip file
-        with zipfile.ZipFile(io.BytesIO(response.data)) as zip_file:
-            # Extract chromedriver
-            for file in zip_file.namelist():
-                if 'chromedriver' in file and not file.endswith('/'):
-                    zip_file.extract(file, webdriver_dir)
-                    # Rename the extracted file to 'chromedriver'
-                    extracted_path = os.path.join(webdriver_dir, file)
-                    target_path = os.path.join(webdriver_dir, 'chromedriver')
-                    if os.path.exists(target_path):
-                        os.remove(target_path)
-                    os.rename(extracted_path, target_path)
-                    break
+        try:
+            with zipfile.ZipFile(io.BytesIO(response.data)) as zip_file:
+                # Extract chromedriver
+                for file in zip_file.namelist():
+                    if 'chromedriver' in file and not file.endswith('/'):
+                        zip_file.extract(file, webdriver_dir)
+                        # Rename the extracted file to 'chromedriver'
+                        extracted_path = os.path.join(webdriver_dir, file)
+                        target_path = os.path.join(webdriver_dir, 'chromedriver')
+                        if os.path.exists(target_path):
+                            os.remove(target_path)
+                        os.rename(extracted_path, target_path)
+                        break
+        except Exception as e:
+            logger.error(f"Error extracting ChromeDriver: {str(e)}")
+            return False
         
         # Make chromedriver executable
-        chromedriver_path = os.path.join(webdriver_dir, 'chromedriver')
-        os.chmod(chromedriver_path, 0o755)
+        try:
+            chromedriver_path = os.path.join(webdriver_dir, 'chromedriver')
+            os.chmod(chromedriver_path, 0o755)
+        except Exception as e:
+            logger.error(f"Error making ChromeDriver executable: {str(e)}")
+            return False
         
         # Test ChromeDriver
         try:
@@ -145,13 +161,16 @@ def install_ssl_certificates():
         
         # Test SSL connection
         http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED', ca_certs=certifi.where())
-        response = http.request('GET', 'https://www.google.com')
-        
-        if response.status == 200:
-            logger.info("SSL certificates installed successfully")
-            return True
-        else:
-            logger.error(f"SSL test failed. Status code: {response.status}")
+        try:
+            response = http.request('GET', 'https://www.google.com')
+            if response.status == 200:
+                logger.info("SSL certificates installed successfully")
+                return True
+            else:
+                logger.error(f"SSL test failed. Status code: {response.status}")
+                return False
+        except Exception as e:
+            logger.error(f"Error testing SSL connection: {str(e)}")
             return False
             
     except Exception as e:

@@ -1,15 +1,26 @@
 #!/bin/bash
 # Setup script for EV Blog Automation Suite
 
+# Exit on error
+set -e
+
+# Function to handle errors
+handle_error() {
+    echo "Error: $1"
+    exit 1
+}
+
 echo "Setting up EV Blog Automation Suite..."
 
 # Create necessary directories
-mkdir -p logs
-mkdir -p images
+echo "Creating necessary directories..."
+mkdir -p logs || handle_error "Failed to create logs directory"
+mkdir -p images || handle_error "Failed to create images directory"
+mkdir -p modules/webdriver || handle_error "Failed to create webdriver directory"
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip3 install -r requirements.txt
+pip3 install -r requirements.txt || handle_error "Failed to install Python dependencies"
 
 # Install ChromeDriver
 echo "Installing ChromeDriver..."
@@ -39,10 +50,10 @@ if install_ssl_certificates():
 else:
     print('Failed to install SSL certificates')
     sys.exit(1)
-"
+" || handle_error "Failed to install ChromeDriver or SSL certificates"
 
 # Run setup.py
 echo "Running setup.py..."
-python3 setup.py
+python3 setup.py || handle_error "Failed to run setup.py"
 
 echo "Setup completed successfully!"

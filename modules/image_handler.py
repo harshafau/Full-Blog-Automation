@@ -84,6 +84,7 @@ class ImageHandler:
             
             image_urls = google_scraper.find_image_urls()
             if not image_urls:
+                self.logger.warning("No images found for query: %s", search_query)
                 return []
                 
             # Save images and get their paths
@@ -92,12 +93,19 @@ class ImageHandler:
             # Get the saved image paths
             search_dir = os.path.join(self.temp_dir, search_query)
             if not os.path.exists(search_dir):
+                self.logger.warning("Search directory not found: %s", search_dir)
                 return []
                 
             # Accept all image files
-            return [os.path.join(search_dir, f) 
-                   for f in os.listdir(search_dir)
-                   if os.path.isfile(os.path.join(search_dir, f))]
+            image_paths = [os.path.join(search_dir, f) 
+                         for f in os.listdir(search_dir)
+                         if os.path.isfile(os.path.join(search_dir, f))]
+            
+            if not image_paths:
+                self.logger.warning("No images saved for query: %s", search_query)
+                return []
+                
+            return image_paths
                    
         except Exception as e:
             self.logger.error(f"Error in Google image search: {str(e)}")
