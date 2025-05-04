@@ -14,30 +14,32 @@ pip install -r requirements.txt
 
 # Install ChromeDriver
 echo "Installing ChromeDriver..."
-CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | cut -d'.' -f1)
-CHROMEDRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION")
-OS_TYPE=$(uname -s)
-
-if [ "$OS_TYPE" = "Darwin" ]; then
+if [ "$(uname)" == "Darwin" ]; then
     # macOS
-    curl -L "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_mac64.zip" -o chromedriver.zip
-    unzip chromedriver.zip -d modules/webdriver/
+    CHROME_VERSION=$(/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --version | awk '{print $3}' | cut -d'.' -f1)
+    echo "Detected Chrome version: $CHROME_VERSION"
+    
+    # Download ChromeDriver
+    echo "Downloading ChromeDriver..."
+    curl -L "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/mac-x64/chromedriver-mac-x64.zip" -o chromedriver.zip
+    
+    # Extract and move to correct location
+    unzip -o chromedriver.zip -d modules/webdriver/
+    mv modules/webdriver/chromedriver-mac-x64/chromedriver modules/webdriver/
+    rm -rf modules/webdriver/chromedriver-mac-x64
     rm chromedriver.zip
+    
+    # Make executable
     chmod +x modules/webdriver/chromedriver
-elif [ "$OS_TYPE" = "Linux" ]; then
-    # Linux
-    curl -L "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" -o chromedriver.zip
-    unzip chromedriver.zip -d modules/webdriver/
-    rm chromedriver.zip
-    chmod +x modules/webdriver/chromedriver
+    echo "ChromeDriver installed successfully"
 else
-    echo "Unsupported operating system: $OS_TYPE"
+    echo "Unsupported operating system"
     exit 1
 fi
 
 # Install SSL certificates for Python
 echo "Installing SSL certificates..."
-if [ "$OS_TYPE" = "Darwin" ]; then
+if [ "$(uname)" == "Darwin" ]; then
     # macOS
     /Applications/Python\ 3.*/Install\ Certificates.command
 fi

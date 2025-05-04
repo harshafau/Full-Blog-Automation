@@ -40,6 +40,26 @@ class ImageHandler:
             try:
                 os.chmod(self.webdriver_path, 0o755)
                 self.logger.info("ChromeDriver found and made executable at: %s", self.webdriver_path)
+                
+                # Test ChromeDriver
+                try:
+                    from selenium import webdriver
+                    from selenium.webdriver.chrome.service import Service
+                    from selenium.webdriver.chrome.options import Options
+                    
+                    options = Options()
+                    options.add_argument('--headless')
+                    options.add_argument('--no-sandbox')
+                    options.add_argument('--disable-dev-shm-usage')
+                    
+                    service = Service(self.webdriver_path)
+                    driver = webdriver.Chrome(service=service, options=options)
+                    driver.quit()
+                    self.logger.info("ChromeDriver test successful")
+                except Exception as e:
+                    self.logger.error("ChromeDriver test failed: %s", str(e))
+                    self.webdriver_path = None
+                    
             except Exception as e:
                 self.logger.error("Failed to make ChromeDriver executable: %s", str(e))
                 self.webdriver_path = None
