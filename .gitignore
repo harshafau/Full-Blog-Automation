@@ -34,8 +34,9 @@ env/
 # Project specific
 logs/
 temp/
+*.log
+*.sqlite3
 credentials.json
-.env
 modules/webdriver/chromedriver*
 
 # Misc

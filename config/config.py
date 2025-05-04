@@ -1,32 +1,55 @@
 import os
-from dotenv import load_dotenv
+import logging
+from pathlib import Path
 
-# Load environment variables
-load_dotenv()
+# Base paths
+BASE_DIR = Path(__file__).resolve().parent.parent
+TEMP_DIR = BASE_DIR / 'temp'
+IMAGES_DIR = TEMP_DIR / 'images'
+LOGS_DIR = BASE_DIR / 'logs'
+
+# Create necessary directories
+TEMP_DIR.mkdir(exist_ok=True)
+IMAGES_DIR.mkdir(exist_ok=True)
+LOGS_DIR.mkdir(exist_ok=True)
 
 # Google Sheets Configuration
-GOOGLE_SHEETS_CREDENTIALS_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'credentials.json')
-SPREADSHEET_ID = ""  # Will be set from web interface
+GOOGLE_SHEETS_CREDENTIALS_PATH = BASE_DIR / 'credentials.json'
+SPREADSHEET_ID = ''  # Will be set from web interface
 WORKSHEET_NAME = 'Blog Posts'
 
 # WordPress Configuration
-WORDPRESS_URL = ""  # Will be set from web interface
-WORDPRESS_USERNAME = ""  # Will be set from web interface
-WORDPRESS_PASSWORD = ""  # Will be set from web interface
+WORDPRESS_URL = ''  # Will be set from web interface
+WORDPRESS_USERNAME = ''  # Will be set from web interface
+WORDPRESS_PASSWORD = ''  # Will be set from web interface
 
 # LLM Configuration
 OLLAMA_URL = 'http://localhost:11434'
 MODEL_NAME = 'gemma3:latest'
 
 # Image Configuration
-MAX_IMAGES_PER_POST = 3
-IMAGE_DOWNLOAD_PATH = 'temp/images'
+MAX_IMAGES_PER_POST = 3  # Will be configurable from web interface
+IMAGE_SEARCH_TIMEOUT = 30
+IMAGE_DOWNLOAD_TIMEOUT = 30
+IMAGE_MIN_WIDTH = 800
+IMAGE_MIN_HEIGHT = 600
+IMAGE_DOWNLOAD_PATH = IMAGES_DIR
 ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp']
 DEFAULT_IMAGE_PATH = 'assets/default_images'  # Fallback directory for default images
 
 # Logging Configuration
-LOG_FILE = 'logs/blog_publisher.log'
-LOG_LEVEL = 'INFO'
+LOG_LEVEL = logging.INFO
+LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+LOG_FILE = LOGS_DIR / 'blog_automation.log'
+
+# Content Configuration
+ARTICLE_LENGTH = 1000  # Will be configurable from web interface
+MAX_RETRIES = 3
+RETRY_DELAY = 5
+
+# Google AdSense Configuration
+ADSENSE_CLIENT_ID = ''  # Optional: Will be set from web interface if provided
+ADSENSE_SLOT_ID = ''  # Optional: Will be set from web interface if provided
 
 # Content Configuration
 REQUIRED_ELEMENTS = {

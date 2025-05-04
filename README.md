@@ -24,8 +24,8 @@ An automated blog publishing system designed for EV-related content. This system
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd ev-blog-automation
+git clone https://github.com/harshafau/Full-Blog-Automation.git
+cd Full-Blog-Automation
 ```
 
 2. Create and activate a virtual environment (recommended):
@@ -46,23 +46,7 @@ pip install -r requirements.txt
 
 ## Configuration
 
-1. Create a `.env` file in the root directory with the following variables:
-```env
-# WordPress Configuration
-WORDPRESS_URL=your-wordpress-site.com
-WORDPRESS_USERNAME=your-username
-WORDPRESS_PASSWORD=your-application-password
-
-# Google Sheets Configuration
-GOOGLE_SHEETS_CREDENTIALS_PATH=credentials.json
-SPREADSHEET_ID=your-spreadsheet-id
-
-# LLM Configuration
-OLLAMA_URL=http://localhost:11434
-MODEL_NAME=gemma3:latest
-```
-
-2. Set up Google Sheets API:
+1. Set up Google Sheets API:
    - Go to Google Cloud Console
    - Create a new project
    - Enable Google Sheets API
@@ -70,10 +54,9 @@ MODEL_NAME=gemma3:latest
    - Download the credentials JSON file
    - Rename it to `credentials.json` and place it in the root directory
 
-3. Set up WordPress:
+2. Set up WordPress:
    - Enable REST API
    - Generate an application password for authentication
-   - Update the `.env` file with your credentials
 
 ## Usage
 
@@ -84,7 +67,13 @@ python3 run_web_interface.py
 
 2. Access the web interface at `http://localhost:8000` (or the port shown in the console)
 
-3. Enter your Google Sheet ID and WordPress credentials
+3. Enter your credentials in the web interface:
+   - Google Sheet ID
+   - WordPress URL
+   - WordPress Username
+   - WordPress Application Password
+   - Number of Images per post (default: 3)
+   - Article Length in words (default: 1000)
 
 4. Click "Generate" to start the blog automation process
 
@@ -117,7 +106,7 @@ Your Google Sheet should have the following columns:
 ├── logs/
 ├── temp/
 │   └── images/
-├── .env
+├── credentials.json
 ├── requirements.txt
 ├── run_web_interface.py
 └── setup.sh
