@@ -32,6 +32,8 @@ class ImageHandler:
             from .patch import download_lastest_chromedriver
             if download_lastest_chromedriver():
                 self.logger.info("Successfully downloaded ChromeDriver")
+                # Update webdriver path after download
+                self.webdriver_path = os.path.join(current_dir, 'webdriver', 'chromedriver')
             else:
                 self.logger.error("Failed to download ChromeDriver")
                 self.webdriver_path = None

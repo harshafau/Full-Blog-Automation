@@ -17,6 +17,7 @@ echo "Creating necessary directories..."
 mkdir -p logs || handle_error "Failed to create logs directory"
 mkdir -p images || handle_error "Failed to create images directory"
 mkdir -p modules/webdriver || handle_error "Failed to create webdriver directory"
+mkdir -p temp/images || handle_error "Failed to create temp/images directory"
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
