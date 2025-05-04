@@ -86,11 +86,31 @@ def download_lastest_chromedriver():
         webdriver_dir = os.path.join(current_dir, 'webdriver')
         os.makedirs(webdriver_dir, exist_ok=True)
         
-        # Download ChromeDriver
-        base_url = "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing"
-        version_url = f"{base_url}/{chrome_version}/mac-x64/chromedriver-mac-x64.zip"
+        # Determine system architecture
+        system = platform.system().lower()
+        machine = platform.machine().lower()
         
-        logger.info(f"Downloading ChromeDriver version {chrome_version}...")
+        if system == "darwin":
+            if machine == "arm64":
+                arch = "mac-arm64"
+            else:
+                arch = "mac-x64"
+        elif system == "linux":
+            if machine == "aarch64":
+                arch = "linux-arm64"
+            else:
+                arch = "linux-x64"
+        elif system == "windows":
+            arch = "win64"
+        else:
+            logger.error(f"Unsupported system: {system}")
+            return False
+        
+        # Download ChromeDriver
+        base_url = "https://storage.googleapis.com/chrome-for-testing-public"
+        version_url = f"{base_url}/{chrome_version}/{arch}/chromedriver-{arch}.zip"
+        
+        logger.info(f"Downloading ChromeDriver version {chrome_version} for {arch}...")
         
         # Create SSL context with certifi
         ssl_context = ssl.create_default_context(cafile=certifi.where())
