@@ -19,8 +19,8 @@ import sys
 import subprocess
 from modules.patch import download_lastest_chromedriver, install_ssl_certificates
 
-# Get the directory of the current script
-current_dir = os.path.dirname(os.path.abspath(__file__))
+# Get the current working directory
+current_dir = os.getcwd()
 webdriver_dir = os.path.join(current_dir, 'modules', 'webdriver')
 
 # Create webdriver directory if it doesn't exist
