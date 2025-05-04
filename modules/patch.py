@@ -11,12 +11,14 @@ from selenium.common.exceptions import WebDriverException, SessionNotCreatedExce
 import sys
 import os
 import urllib.request
+import ssl
 import re
 import zipfile
 import stat
 import json
 import shutil
 from sys import platform
+import logging
 
 def webdriver_executable():
     if platform == "linux" or platform == "linux2" or platform == "darwin":
@@ -45,18 +47,21 @@ def download_lastest_chromedriver(current_chrome_version=""):
     
     result = False
     try:
+        # Create SSL context that ignores certificate verification
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
         url = 'https://googlechromelabs.github.io/chrome-for-testing/latest-versions-per-milestone-with-downloads.json'
     
-        # Download latest chromedriver.
-        stream = urllib.request.urlopen(url)
+        # Download latest chromedriver with SSL context
+        stream = urllib.request.urlopen(url, context=ssl_context)
         content = json.loads(stream.read().decode('utf-8'))
 
         # Parse the latest version.
-        
         if current_chrome_version != "":
             match = re.search(r'\d+', current_chrome_version)
             downloads = content["milestones"][match.group()]
-        
         else:
             for milestone in content["milestones"]:
                 downloads = content["milestones"][milestone]
@@ -71,10 +76,11 @@ def download_lastest_chromedriver(current_chrome_version=""):
         app_path = os.getcwd()
         chromedriver_path = os.path.normpath(os.path.join(app_path, 'webdriver', webdriver_executable()))
         file_path = os.path.normpath(os.path.join(app_path, 'webdriver', file_name))
-        urllib.request.urlretrieve(driver_url, file_path)
-
-        # Unzip the file into folde
         
+        # Download with SSL context
+        urllib.request.urlretrieve(driver_url, file_path, context=ssl_context)
+
+        # Unzip the file into folder
         webdriver_path = os.path.normpath(os.path.join(app_path, 'webdriver'))
         with zipfile.ZipFile(file_path, 'r') as zip_file:
             for member in zip_file.namelist():
