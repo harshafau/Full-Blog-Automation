@@ -5,48 +5,44 @@ echo "Setting up EV Blog Automation Suite..."
 
 # Create necessary directories
 mkdir -p logs
-mkdir -p temp/images
-mkdir -p modules/webdriver
+mkdir -p images
 
 # Install Python dependencies
 echo "Installing Python dependencies..."
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 
 # Install ChromeDriver
 echo "Installing ChromeDriver..."
-if [ "$(uname)" == "Darwin" ]; then
-    # macOS
-    CHROME_VERSION=$(/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --version | awk '{print $3}' | cut -d'.' -f1)
-    echo "Detected Chrome version: $CHROME_VERSION"
-    
-    # Download ChromeDriver
-    echo "Downloading ChromeDriver..."
-    curl -L "https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/mac-x64/chromedriver-mac-x64.zip" -o chromedriver.zip
-    
-    # Extract and move to correct location
-    unzip -o chromedriver.zip -d modules/webdriver/
-    mv modules/webdriver/chromedriver-mac-x64/chromedriver modules/webdriver/
-    rm -rf modules/webdriver/chromedriver-mac-x64
-    rm chromedriver.zip
-    
-    # Make executable
-    chmod +x modules/webdriver/chromedriver
+python3 -c "
+import os
+import sys
+import subprocess
+from modules.patch import download_lastest_chromedriver, install_ssl_certificates
+
+# Get the directory of the current script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+webdriver_dir = os.path.join(current_dir, 'modules', 'webdriver')
+
+# Create webdriver directory if it doesn't exist
+os.makedirs(webdriver_dir, exist_ok=True)
+
+# Download ChromeDriver
+if download_lastest_chromedriver():
     echo "ChromeDriver installed successfully"
-else
-    echo "Unsupported operating system"
+else:
+    echo "Failed to install ChromeDriver"
     exit 1
-fi
 
-# Install SSL certificates for Python
-echo "Installing SSL certificates..."
-if [ "$(uname)" == "Darwin" ]; then
-    # macOS
-    /Applications/Python\ 3.*/Install\ Certificates.command
-fi
+# Install SSL certificates
+if install_ssl_certificates():
+    echo "SSL certificates installed successfully"
+else:
+    echo "Failed to install SSL certificates"
+    exit 1
+"
 
-# Run the setup.py script
-echo "Running setup script..."
+# Run setup.py
+echo "Running setup.py..."
 python3 setup.py
 
-echo "Setup complete! You can now run the web interface with:"
-echo "python3 run_web_interface.py"
+echo "Setup completed successfully!"
