@@ -17,7 +17,7 @@ import zipfile
 import stat
 import json
 import shutil
-from sys import platform
+import platform
 import logging
 import subprocess
 import requests
@@ -32,7 +32,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def webdriver_executable():
-    if platform == "linux" or platform == "linux2" or platform == "darwin":
+    if platform.system().lower() in ["linux", "darwin"]:
         return 'chromedriver'
     return 'chromedriver.exe'
 
