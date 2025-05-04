@@ -28,21 +28,17 @@ git clone https://github.com/harshafau/Full-Blog-Automation.git
 cd Full-Blog-Automation
 ```
 
-2. Create and activate a virtual environment (recommended):
+2. Run the setup script:
 ```bash
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
-
-3. Run the setup script:
-```bash
+chmod +x setup.sh
 ./setup.sh
 ```
 
-Or manually install dependencies:
-```bash
-pip install -r requirements.txt
-```
+The setup script will:
+- Install all required Python packages
+- Set up ChromeDriver
+- Configure SSL certificates
+- Create necessary directories
 
 ## Configuration
 
@@ -116,12 +112,12 @@ Your Google Sheet should have the following columns:
 
 1. ChromeDriver Issues:
    - Make sure Chrome browser is installed
-   - The script will automatically download the matching ChromeDriver version
+   - The setup script will automatically download the matching ChromeDriver version
    - If issues persist, manually download ChromeDriver matching your Chrome version
 
 2. SSL Certificate Issues:
-   - Make sure your system's SSL certificates are up to date
-   - For development, you can disable SSL verification (not recommended for production)
+   - The setup script will automatically install SSL certificates
+   - If issues persist, run: `/Applications/Python\ 3.*/Install\ Certificates.command`
 
 3. WordPress Connection Issues:
    - Verify your WordPress site has REST API enabled
