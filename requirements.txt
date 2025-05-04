@@ -1,0 +1,14 @@
+flask>=2.0.1
+requests>=2.26.0
+selenium>=4.1.0
+python-dotenv>=0.19.0
+google-api-python-client>=2.0.0
+google-auth-httplib2>=0.1.0
+google-auth-oauthlib>=0.4.6
+Pillow>=8.3.1
+beautifulsoup4>=4.9.3
+markdown>=3.3.4
+python-wordpress-xmlrpc>=2.3
+urllib3>=2.0.0
+chardet>=5.0.0
+charset-normalizer>=3.0.0
